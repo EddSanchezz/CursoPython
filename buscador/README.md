@@ -1,0 +1,1 @@
+script encargado de que al momento de ingresar el nombre del artículo busque y devuelva una lista de los diez artículos relacionados a la palabra que sean mejor valorados y con mas calificaciones en amazon.

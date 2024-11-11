@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import Grafica_R3 as gr
+import grafica_R3 as gr
 
 
 def funcion(x,y):
