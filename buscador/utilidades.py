@@ -1,17 +1,21 @@
-def agregar_articulos_txt(texto):
-    with open("recursos/rating.txt", "a", encoding="utf-8") as txt:
-        if isinstance(texto, dict):
-            for k, v in texto.items():
-                agregar_articulos_txt(f"{k}:{v}")
-        else:
-            txt.write(texto + "\n")
+import csv
 
-def cambiar_articulos_txt(texto):
-    with open("recursos/rating.txt", "w", encoding="utf-8") as txt:
-        txt.write(texto)
+def guardar_articulos_csv(articulos, nombre_archivo):
+    with open(nombre_archivo, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        for articulo in articulos:
+            writer.writerow(articulo)
 
-def leer_articulos_txt():
-    with open("recursos/rating.txt", "r", encoding="utf-8") as txt:
-        return txt.read()
+def guardar_articulo_csv(nombre_archivo, articulo):
+  with open(nombre_archivo, 'a', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(articulo)
 
+def leer_articulos_csv(nombre_archivo):
+    articulos = []
+    with open(nombre_archivo, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for articulo in reader:
+            articulos.append(articulo)
 
+    return articulos

@@ -1,38 +1,63 @@
 from selenium.webdriver.common.by import By
 import time
 from buscador.opciones_driver import iniciar_chrome
-from buscador.utilidades import agregar_articulos_txt
+from buscador.utilidades import guardar_articulo_csv
+from buscador.utilidades import leer_articulos_csv
 
+ruta = "rating.csv"
 
-def extraer_datos(nombre_articulo: str) -> dict:
+def extraer_datos(nombre_articulo: str) -> list:
     driver = iniciar_chrome()
-    palabra = nombre_articulo
-    url = f"https://www.amazon.com/s?k={palabra.replace(' ', '+')}"
+    url = f"https://www.amazon.com/s?k={nombre_articulo.replace(' ', '+')}"
     driver.get(url)
+    time.sleep(2)
 
     div = driver.find_elements(By.CSS_SELECTOR, "div.a-section.a-spacing-small.puis-padding-left-small.puis-padding-right-small")
-    time.sleep(3)
+    time.sleep(2)
 
 
-    articulos = {}
+    articulos = []
     for art in div:
-        calificaciones = art.find_elements(By.CSS_SELECTOR, "span.a-icon-alt")
         nombres_art = art.find_elements(By.CSS_SELECTOR,"span.a-size-base-plus.a-color-base.a-text-normal")
         precios_entero = art.find_elements(By.CSS_SELECTOR,"span.a-price-whole")
         precios_fraccion = art.find_elements(By.CSS_SELECTOR,"span.a-price-fraction")
+        calificaciones = art.find_elements(By.CSS_SELECTOR, "span.a-icon-alt")
+        cant_calificaciones = art.find_elements(By.CSS_SELECTOR, "span.a-size-base.s-underline-text")
 
-        for i in range(len(precios_entero)):
-            nombre = nombres_art[i].text
-            precio = [precios_entero[i].text + "." + precios_fraccion[i].text,]
-            articulos[nombre] = precio
+        for i in range(len(nombres_art)):
+            nombre = nombres_art[i].text if i < len(nombres_art) else "No disponible"
+            precio = precios_entero[i].text + "." + precios_fraccion[i].text if i < len(precios_entero) and i < len(precios_fraccion) else "No disponible"
+            calificacion = calificaciones[i].get_attribute("innerText") if i < len(calificaciones) else "No disponible"
+            cantidad = cant_calificaciones[i].text if i < len(cant_calificaciones) else "No disponible"
 
-    print(articulos)
+            articulos.append([nombre,precio, calificacion[0:3],cantidad.replace(",","")])
 
     driver.quit()
-
-def guardar_articulos_txt(articulos: dict):
-    for llave, valor in articulos.items():
-        agregar_articulos_txt(f"{llave}: {valor}")
+    return articulos
 
 
-extraer_datos("carros rojos")
+def obtener_mejor_producto(palabra):
+    lista_productos = extraer_datos(palabra)
+    mejor_producto = None
+    niveles_calificacion = [4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.0]
+
+    for nivel in niveles_calificacion:
+        for producto in lista_productos:
+            nombre, precio, calificacion, cantidad_calificaciones = producto
+            calificacion = float(calificacion)
+            cantidad_calificaciones = int(cantidad_calificaciones)
+
+            if calificacion >= nivel:
+                if (mejor_producto is None or
+                        cantidad_calificaciones > mejor_producto[3] or
+                        (cantidad_calificaciones == mejor_producto[3] and calificacion > mejor_producto[2])):
+                    mejor_producto = [nombre, precio, calificacion, cantidad_calificaciones]
+
+        if mejor_producto:
+            break
+
+    return mejor_producto
+
+
+lista = obtener_mejor_producto("carro rojo")
+print(lista)
