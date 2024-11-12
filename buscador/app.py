@@ -1,7 +1,4 @@
-from buscador.buscador_funciones import extraer_datos
+from buscador.buscador_funciones import extraer_datos, login_amazon
+from buscador.opciones_driver import iniciar_chrome
 
-
-def main():
-    nombre_articulo = "carros rojos"
-    # buscar los artículos relacionados a una palabra y los guarda con su respectivo nombre y precio
-    extraer_datos(nombre_articulo)
+res = login_amazon()

@@ -1,13 +1,15 @@
 from selenium.webdriver.common.by import By
 import time
 from buscador.opciones_driver import iniciar_chrome
+import json
+from config_amazon import *
 from buscador.utilidades import guardar_articulo_csv
 from buscador.utilidades import leer_articulos_csv
 
-ruta = "rating.csv"
+
+driver = iniciar_chrome()
 
 def extraer_datos(nombre_articulo: str) -> list:
-    driver = iniciar_chrome()
     url = f"https://www.amazon.com/s?k={nombre_articulo.replace(' ', '+')}"
     driver.get(url)
     time.sleep(2)
@@ -45,7 +47,7 @@ def obtener_mejor_producto(palabra):
         for producto in lista_productos:
             nombre, precio, calificacion, cantidad_calificaciones = producto
             calificacion = float(calificacion)
-            cantidad_calificaciones = int(cantidad_calificaciones)
+            cantidad_calificaciones = int(cantidad_calificaciones) if cantidad_calificaciones else 0
 
             if calificacion >= nivel:
                 if (mejor_producto is None or
@@ -59,5 +61,10 @@ def obtener_mejor_producto(palabra):
     return mejor_producto
 
 
-lista = obtener_mejor_producto("carro rojo")
-print(lista)
+def login_amazon():
+    print("Login en amazon desde cero")
+    driver.get("https://es.pornhub.com/")
+    aceptar = driver.findelement("")
+    input("pulsa ENTER para salir")
+    driver.quit()
+
