@@ -1,15 +1,14 @@
 from selenium.webdriver.common.by import By
 import time
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 from buscador.opciones_driver import iniciar_chrome
 import json
-from config_amazon import *
-from buscador.utilidades import guardar_articulo_csv
-from buscador.utilidades import leer_articulos_csv
 
 
-driver = iniciar_chrome()
 
-def extraer_datos(nombre_articulo: str) -> list:
+def extraer_datos(nombre_articulo: str) -> list[list]:
+    driver = iniciar_chrome()
     url = f"https://www.amazon.com/s?k={nombre_articulo.replace(' ', '+')}"
     driver.get(url)
     time.sleep(2)
@@ -25,46 +24,70 @@ def extraer_datos(nombre_articulo: str) -> list:
         precios_fraccion = art.find_elements(By.CSS_SELECTOR,"span.a-price-fraction")
         calificaciones = art.find_elements(By.CSS_SELECTOR, "span.a-icon-alt")
         cant_calificaciones = art.find_elements(By.CSS_SELECTOR, "span.a-size-base.s-underline-text")
-
+        enlaces = art.find_elements(By.CSS_SELECTOR,"a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal")
         for i in range(len(nombres_art)):
             nombre = nombres_art[i].text if i < len(nombres_art) else "No disponible"
             precio = precios_entero[i].text + "." + precios_fraccion[i].text if i < len(precios_entero) and i < len(precios_fraccion) else "No disponible"
             calificacion = calificaciones[i].get_attribute("innerText") if i < len(calificaciones) else "No disponible"
             cantidad = cant_calificaciones[i].text if i < len(cant_calificaciones) else "No disponible"
+            enlace = enlaces[i].get_attribute("href") if i < len(enlaces) else "No disponible"
 
-            articulos.append([nombre,precio, calificacion[0:3],cantidad.replace(",","")])
+            articulos.append([nombre,precio, calificacion[0:3],cantidad.replace(",",""),enlace])
 
     driver.quit()
     return articulos
 
 
-def obtener_mejor_producto(palabra):
-    lista_productos = extraer_datos(palabra)
-    mejor_producto = None
-    niveles_calificacion = [4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.0]
+def obtener_mejor_producto(palabra: str) -> list:
+    lista_articulos = extraer_datos(palabra)
 
-    for nivel in niveles_calificacion:
-        for producto in lista_productos:
-            nombre, precio, calificacion, cantidad_calificaciones = producto
-            calificacion = float(calificacion)
-            cantidad_calificaciones = int(cantidad_calificaciones) if cantidad_calificaciones else 0
+    lista_articulos_filtrada = [
+        articulo for articulo in lista_articulos
+        if articulo[3].isdigit() and articulo[2].replace('.', '', 1).isdigit()
+    ]
 
-            if calificacion >= nivel:
-                if (mejor_producto is None or
-                        cantidad_calificaciones > mejor_producto[3] or
-                        (cantidad_calificaciones == mejor_producto[3] and calificacion > mejor_producto[2])):
-                    mejor_producto = [nombre, precio, calificacion, cantidad_calificaciones]
+    mejor = max(
+        lista_articulos_filtrada,
+        key=lambda x: (int(x[3]), float(x[2]))
+    )
+    return mejor
 
-        if mejor_producto:
-            break
 
-    return mejor_producto
+def guardar_cookies():
+    driver = iniciar_chrome()
+    print("Login en amazon desde cero")
+    driver.get("https://www.amazon.com")
+
+    input("presiona Enter despues de iniciar sesión en la pestaña...")
+    with open("cookies_amazon.json", "w") as file:
+        for cookie in driver.get_cookies():
+            json.dump(cookie, file)
+
 
 
 def login_amazon():
-    print("Login en amazon desde cero")
-    driver.get("https://es.pornhub.com/")
-    aceptar = driver.findelement("")
-    input("pulsa ENTER para salir")
-    driver.quit()
+    driver = iniciar_chrome()
+    with open("cookies_amazon.json", "r") as file:
+        cookies = json.load(file)
 
+    driver.get("https://www.amazon.com/robots.txt")
+
+    for cookie in cookies:
+        if 'expiry' in cookie:
+            del cookie['expiry']
+        driver.add_cookie(cookie)
+
+    driver.refresh()
+    return driver
+
+
+def agregar_a_whislist(articulo: list):
+    driver = login_amazon()
+    driver.get(articulo[4])
+
+    boton_lista_deseos = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//input[contains(@title,'Agregar a la Lista')]")))
+    boton_lista_deseos.click()
+    print("Producto agregado a la lista de deseos.")
+
+
+    driver.quit()
