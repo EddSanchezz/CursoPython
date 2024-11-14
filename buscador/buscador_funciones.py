@@ -12,8 +12,11 @@ def extraer_datos(nombre_articulo: str) -> list[list]:
     url = f"https://www.amazon.com/s?k={nombre_articulo.replace(' ', '+')}"
     driver.get(url)
     time.sleep(2)
+    #div = driver.find_elements(By.XPATH, "/html/body/div[1]/div[1]/div[1]/div[1]/div/span[1]/div[1]/div[61]/div/div/span/div/div/div")
+    #div = []
 
-    div = driver.find_elements(By.CSS_SELECTOR, "div.a-section.a-spacing-small.puis-padding-left-small.puis-padding-right-small")
+    #for i in range(1,63):
+    div = driver.find_elements(By.XPATH,"/html/body/div[1]/div[1]/div[1]/div[1]/div/span[1]/div[1]/div/div/div/span/div")
     time.sleep(2)
 
 
@@ -90,4 +93,10 @@ def agregar_a_whislist(articulo: list):
     print("Producto agregado a la lista de deseos.")
 
 
+
+
     driver.quit()
+
+    carro = "carro"
+    moto = "moto"
+    f"{moto}"

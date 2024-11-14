@@ -2,8 +2,11 @@ from buscador.buscador_funciones import extraer_datos, guardar_cookies, obtener_
 from buscador.opciones_driver import iniciar_chrome
 from buscador.utilidades import guardar_articulos_csv
 
-articulo = obtener_mejor_producto("carro rojo")
+#articulo = obtener_mejor_producto("carro rojo")
 #guardar_cookies()
-agregar_a_whislist(articulo)
+#agregar_a_whislist(articulo)
 
-guardar_articulos_csv("rating.csv",articulo)
+articulos = extraer_datos("carro rojo")
+print(articulos)
+
+#guardar_articulos_csv("rating.csv",articulo)
