@@ -3,6 +3,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+from webdriver_manager.firefox import GeckoDriverManager
+
 
 def iniciar_chrome():
     ruta = ChromeDriverManager().install()
@@ -43,5 +47,28 @@ def iniciar_chrome():
     s = Service(ruta)
     driver = webdriver.Chrome(service=s, options=options)
     driver.set_window_position(0, 0)
+    time.sleep(3)
+    return driver
+
+def iniciar_firefox():
+    ruta = GeckoDriverManager().install()
+
+    options = Options()
+
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
+    options.set_preference("general.useragent.override", user_agent)
+
+    options.add_argument("--width=500")
+    options.add_argument("--height=1080")
+    options.set_preference("dom.webnotifications.enabled", False) 
+    options.set_preference("dom.security.https_only_mode", False)  
+    options.set_preference("intl.accept_languages", "en-US, en") 
+    options.set_preference("browser.download.useDownloadDir", False)
+    
+    s = Service(ruta)
+
+    driver = webdriver.Firefox(service=s, options=options)
+    driver.set_window_position(0, 0)
+
     time.sleep(3)
     return driver
