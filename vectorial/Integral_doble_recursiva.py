@@ -1,3 +1,7 @@
+import Grafica_R3 as gr
+from vectorial.Integral_doble import funcion
+
+
 class Volumen:
     def __init__(self):
         self.a = 0
@@ -49,3 +53,5 @@ if __name__ == "__main__":
             vol.calcular()
     except ValueError:
         print("Por favor, ingrese valores válidos.")
+
+    gr.graficar_3D(funcion, (vol.a, vol.b), (vol.c, vol.d))

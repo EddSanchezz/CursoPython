@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from Config import GOOGLE_USER, GOOGLE_PASS
+from Config_user import GOOGLE_USER, GOOGLE_PASS
 
 def iniciar_webdriver_indetectable(headless=False, pos="maximizada"):
     option = uc.ChromeOptions()
@@ -38,12 +38,10 @@ def login_google():
     wait = WebDriverWait(driver, 30)
     driver.get("https://accounts.google.com/")
     
-    # Campo de correo
     e = wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "input[type='email']")))
     e.send_keys(GOOGLE_USER)
     e.send_keys(Keys.ENTER)
     
-    # Campo de contraseña
     e = wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "input[type='password']")))
     e.send_keys(GOOGLE_PASS)
     e.send_keys(Keys.ENTER)

@@ -3,14 +3,17 @@ import json
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from driver_indetectable import login_google
-from opciones_driver import iniciar_firefox
-from Config import *
-from config import *
+
+from buscador.opciones_driver import iniciar_chrome
 
 
 def extraer_datos(nombre_articulo: str) -> list[list]:
-    driver = iniciar_firefox()
+    """
+    extrae una lista de todos los artículos encontrados
+    :param nombre_articulo: nombre del artículo
+    :return: lista de listas [nombre_artículo,precio,valoración,cantidad de valoraciones, enlace]
+    """
+    driver = iniciar_chrome()
     url = f"https://www.amazon.com/s?k={nombre_articulo.replace(' ', '+')}"
     driver.get(url)
     time.sleep(2)
@@ -41,6 +44,11 @@ def extraer_datos(nombre_articulo: str) -> list[list]:
 
 
 def obtener_mejor_producto(palabra: str) -> list:
+    """
+    analiza una lista de artículos para elegir el mejor artículo
+    :param palabra:
+    :return: lista con las caracteristicas del artículo
+    """
     lista_articulos = extraer_datos(palabra)
 
     lista_articulos_filtrada = [
@@ -52,8 +60,13 @@ def obtener_mejor_producto(palabra: str) -> list:
     return mejor
 
 
-def guardar_cookies(driver):
-    driver = iniciar_firefox()
+def guardar_cookies_amazon():
+    """
+    guarda las cookies de amazon (de forma manual)
+    :param driver:
+    :return:
+    """
+    driver = iniciar_chrome()
     print("Login en amazon desde cero")
     driver.get("https://www.amazon.com")
 
@@ -63,7 +76,13 @@ def guardar_cookies(driver):
             json.dump(cookie, file)
 
 
-def guardar_cookies_url(driver, nombre_archivo):
+def guardar_cookies_url(driver, nombre_archivo: str):
+    """
+    recibe un driver y el nombre del archivo en el que guardará la información de
+    las cookies en un json
+    :param driver: driver
+    :param nombre_archivo: str
+    """
     input("Presiona Enter después de iniciar sesión en la pestaña...")
     with open(f"buscador/{nombre_archivo}.json", "w") as file:
         for cookie in driver.get_cookies():
@@ -71,11 +90,9 @@ def guardar_cookies_url(driver, nombre_archivo):
     driver.quit()
 
 
-guardar_cookies_url(driver=login_google(), nombre_archivo="cookies_google")
-
 
 def login_amazon():
-    driver = iniciar_firefox()
+    driver = iniciar_chrome()
     with open("cookies_amazon.json", "r") as file:
         cookies = json.load(file)
 
