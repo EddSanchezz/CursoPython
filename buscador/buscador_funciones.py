@@ -96,7 +96,7 @@ def login_amazon():
     with open("cookies_amazon.json", "r") as file:
         cookies = json.load(file)
 
-    driver.get("https://www.amazon.com/robots.txt")
+    driver.get("https://www.facebook.com/robots.txt")
     for cookie in cookies:
         if 'expiry' in cookie:
             del cookie['expiry']
